@@ -14,5 +14,11 @@ class ExampleController extends Controller
         //
     }
 
-    //
+
+    public function getuser()
+    {
+        $r = ['user'=>'Liying','name'=>'李莹'];
+        echo json_encode($r);     
+    }
+   
 }
