@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use DB;
+
 class ExampleController extends Controller
 {
     /**
@@ -17,8 +19,14 @@ class ExampleController extends Controller
 
     public function getuser()
     {
-        $r = ['user'=>'Liying','name'=>'李莹'];
-        echo json_encode($r);     
+
+       // $r = ['user'=>'Liying','name'=>'李莹'];
+
+        $res = DB::table('bqsync_retail_info')
+                ->where('RNO','1100000008')
+                ->first();
+
+        return json_encode($res);     
     }
    
 }
