@@ -2,11 +2,11 @@
 
 require_once __DIR__.'/../vendor/autoload.php';
 
-try {
+//try {
     (new Dotenv\Dotenv(__DIR__.'/../'))->load();
-} catch (Dotenv\Exception\InvalidPathException $e) {
+//} catch (Dotenv\Exception\InvalidPathException $e) {
     //
-}
+//}
 
 /*
 |--------------------------------------------------------------------------
@@ -25,8 +25,21 @@ $app = new Laravel\Lumen\Application(
 
 $app->withFacades();
 
-// $app->withEloquent();
+//$app->configure('jwt');
+//$app->configure('oauth2');
 
+//$app->withEloquent();
+
+//class_alias('Tymon\JWTAuth\Facades\JWTAuth', 'JWTAuth');    
+
+/** This gives you finer control over the payloads you create if you require it.  
+ *  Source: https://github.com/tymondesigns/jwt-auth/wiki/Installation  
+ */  
+//class_alias('Tymon\JWTAuth\Facades\JWTFactory', 'JWTFactory'); // Optional 
+
+// class_alias(\LucaDegasperi\OAuth2Server\Facades\Authorizer::class, 'Authorizer');
+
+// class_alias('Illuminate\Support\Facades\Config', 'Config');
 /*
 |--------------------------------------------------------------------------
 | Register Container Bindings
@@ -44,7 +57,7 @@ $app->singleton(
 );
 
 $app->singleton(
-    Illuminate\Contracts\Console\Kernel::class,
+    Illuminate\Contracts\Console\Kernel::class,  
     App\Console\Kernel::class
 );
 
@@ -66,7 +79,13 @@ $app->singleton(
 // $app->routeMiddleware([
 //     'auth' => App\Http\Middleware\Authenticate::class,
 // ]);
-
+// $app->routeMiddleware([  
+//     'jwt.auth'    => Tymon\JWTAuth\Middleware\GetUserFromToken::class,  
+//     'jwt.refresh' => Tymon\JWTAuth\Middleware\RefreshToken::class,  
+// ]);  
+$app->middleware([
+    \LucaDegasperi\OAuth2Server\Middleware\OAuthExceptionHandlerMiddleware::class
+]);
 /*
 |--------------------------------------------------------------------------
 | Register Service Providers
@@ -83,6 +102,15 @@ $app->singleton(
 // $app->register(App\Providers\EventServiceProvider::class);
 
 $app->register(Dingo\Api\Provider\LumenServiceProvider::class);
+//$app->register(Tymon\JWTAuth\Providers\JWTAuthServiceProvider::class);
+//$app->register(Illuminate\Cache\CacheServiceProvider::class);
+//$app->register(Illuminate\Cache\CacheManager::class);
+
+// $app->register(\LucaDegasperi\OAuth2Server\Storage\FluentStorageServiceProvider::class);
+// $app->register(\LucaDegasperi\OAuth2Server\OAuth2ServerServiceProvider::class);
+
+
+
 /*
 |--------------------------------------------------------------------------
 | Load The Application Routes
@@ -98,10 +126,42 @@ $app->group(['namespace' => 'App\Http\Controllers'], function ($app) {
     require __DIR__.'/../app/Http/routes.php';
 });
 
+//HTTP Basic
+app('Dingo\Api\Auth\Auth')->extend('basic', function ($app) {
+   return new Dingo\Api\Auth\Provider\Basic($app['auth'], 'email');
+});
 
+// By default only basic authentication is enabled. Authentication is covered in more detail in a later chapter.
+// For more complex configuration you will need a service provider or bootstrap file.
 // $app['Dingo\Api\Auth\Auth']->extend('oauth', function ($app) {
 //    return new Dingo\Api\Auth\Provider\JWT($app['Tymon\JWTAuth\JWTAuth']);
 // });
+
+//oauth 认证
+// app('Dingo\Api\Auth\Auth')->extend('oauth', function ($app) {
+//    $provider = new Dingo\Api\Auth\Provider\OAuth2($app['oauth2-server.authorizer']->getChecker());
+
+//     $provider->setUserResolver(function ($id) {
+//         // Logic to return a user by their ID.
+//     });
+
+//     $provider->setClientResolver(function ($id) {
+//         // Logic to return a client by their ID.
+//     });
+
+//     return $provider;
+// });
+
+
+// By default rate limiting is disabled. You can register your custom throttles 
+// with the rate limiter or use the existing authenticated and unauthenticated throttles.
+// For more complex configuration you will need a service provider or bootstrap file.
+
+$app['Dingo\Api\Http\RateLimit\Handler']->extend(function ($app) {
+    return new Dingo\Api\Http\RateLimit\Throttle\Authenticated;
+});
+
+
 
 $app['Dingo\Api\Exception\Handler']->setErrorFormat([
     'error' => [
@@ -112,5 +172,13 @@ $app['Dingo\Api\Exception\Handler']->setErrorFormat([
         'debug' => ':debug'
     ]
 ]);
+
+// $app->routeMiddleware([
+//     'check-authorization-params' => \LucaDegasperi\OAuth2Server\Middleware\CheckAuthCodeRequestMiddleware::class,
+//     'oauth' => \LucaDegasperi\OAuth2Server\Middleware\OAuthMiddleware::class,
+//     'oauth-client' => \LucaDegasperi\OAuth2Server\Middleware\OAuthClientOwnerMiddleware::class,
+//     'oauth-user' => \LucaDegasperi\OAuth2Server\Middleware\OAuthUserOwnerMiddleware::class,
+// ]);
+
 
 return $app;

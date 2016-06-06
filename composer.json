@@ -8,7 +8,11 @@
         "php": ">=5.5.9",
         "laravel/lumen-framework": "5.2.*",
         "dingo/api": "1.0.x@dev",
-        "vlucas/phpdotenv": "~2.2"
+        "vlucas/phpdotenv": "~2.2",
+        "tymon/jwt-auth": "^0.5.9",
+        "basicit/lumen-vendor-publish": "^1.0",
+        "league/oauth2-server": "4.1.*",
+        "lucadegasperi/oauth2-server-laravel": "^5.1.4"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
@@ -23,6 +27,9 @@
         "classmap": [
             "tests/",
             "database/"
-        ]
+        ],
+      "files": [  
+      "app/helpers.php"  
+       ]  
     }
 }
